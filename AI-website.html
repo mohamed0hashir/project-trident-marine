@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width,
+initial-scale=1.0">
+ <title>Trident Water & Environmental Analyzer</title>
+ <style>
+ body { font-family: Arial, sans-serif; margin: 20px;
+background: #f0f8ff; }
+ h2 {
+ text-align: center;
+ color: #0077b6;
+ transition: all 0.3s ease;
+ cursor: pointer;
+ }
+ h2:hover {
+ text-decoration: underline;
+ transform: scale(1.1);
+ }
+ input { margin-bottom: 10px; padding: 5px; width: 120px;
+transition: all 0.3s ease; }
+ input:hover { transform: scale(1.05); box-shadow: 0 0 8px
+#0077b6; }
+ label { display: inline-block; width: 180px; }
+ button { padding: 10px 25px; margin-top: 10px; transition: all
+0.3s ease; }
+ button:hover { transform: scale(1.05); box-shadow: 0 0 10px
+#0077b6; }
+ #output {
+ margin-top: 20px;
+ background: #e0f7fa;
+ padding: 15px;
+ border-radius: 5px;
+ white-space: pre-wrap;
+ transition: all 0.5s ease;
+ transform: scale(0.95);
+ opacity: 0;
+ }
+ #output.show { transform: scale(1); opacity: 1; }
+ </style>
+</head>
+<body>
+ <h2>Trident</h2>
+ <div>
+ <label>Turbidity (%)</label><input type="number" id="turbidity"
+min="0" max="100"><br>
+ <label>LDR (%)</label><input type="number" id="ldr" min="0"
+max="100"><br>
+ <label>TDS (%)</label><input type="number" id="tds" min="0"
+max="100"><br>
+ <label>Inside Temp (°C)</label><input type="number"
+id="tempInside"><br>
+ <label>Water Temp (°C)</label><input type="number"
+id="tempOutside"><br>
+ <label>pH</label><input type="number" id="ph" step="0.1"><br>
+ <button onclick="analyzeSensors()">Analyze</button>
+ </div>
+ <div id="output"></div>
+ <script>
+ function analyzeSensors() {
+ let turbidity =
+parseFloat(document.getElementById("turbidity").value);
+ let ldr = parseFloat(document.getElementById("ldr").value);
+ let tds = parseFloat(document.getElementById("tds").value);
+ let tempInside =
+parseFloat(document.getElementById("tempInside").value);
+ let tempOutside =
+parseFloat(document.getElementById("tempOutside").value);
+ let ph = parseFloat(document.getElementById("ph").value);
+ let turbidityStatus = turbidity < 25 ? "Very clear" :
+turbidity < 50 ? "Slightly murky" : turbidity < 75 ? "Very dirty" :
+"Heavily polluted";
+ let ldrStatus = ldr > 75 ? "Good visibility" : ldr > 50 ?
+"Partial obstruction" : ldr > 25 ? "Obstacle detected" : "Very low
+visibility";
+ let tdsStatus = tds < 30 ? "Fresh water" : tds < 60 ?
+"Moderately pure" : tds < 90 ? "Slightly polluted" : "Highly polluted";
+ let tempInsideStatus = tempInside < 40 ? "Normal temp" :
+tempInside < 60 ? "Warm, caution" : tempInside < 80 ? "High, possible
+fire risk" : "Danger! Fire likely";
+ let tempOutsideStatus = tempOutside < 10 ? "Cold water" :
+tempOutside < 25 ? "Normal water" : tempOutside < 35 ? "Warm water" :
+"Hot water";
+ let phStatus = ph < 6 ? "Acidic water" : ph <= 8 ? "Neutral
+/ Safe water" : "Basic / Alkaline water";
+ let pollutionType = "None", reason = "", severity = 0,
+danger = "Low", marineImpact = "Minimal";
+ if(turbidity >= 75 && tds >= 90){
+ pollutionType = "Industrial chemical contamination or
+heavy pollution";
+ reason = "High dissolved solids and very dirty water
+suggest chemical waste, sewage, or industrial runoff.";
+ severity = 90;
+ danger = "High";
+ marineImpact = "Severe: can harm aquatic life, reduce
+oxygen, kill fish.";
+ } else if(turbidity >= 50 && tds >= 60){
+ pollutionType = "Moderate pollution or silted water";
+ reason = "Moderate turbidity and TDS may indicate
+sediment, mild runoff, or partial contamination.";
+ severity = 60;
+ danger = "Moderate";
+ marineImpact = "Moderate: some stress to aquatic
+organisms.";
+ } else if(turbidity < 50 && tds < 60 && ph < 6){
+ pollutionType = "Acidic water contamination";
+ reason = "Low pH indicates acid runoff, possibly from
+rainwater interaction or chemical spill.";
+ severity = 70;
+ danger = "High";
+ marineImpact = "Acidic water can harm fish, plants, and
+microorganisms.";
+ } else if(turbidity < 50 && tds < 60 && ph > 8){
+ pollutionType = "Alkaline water contamination";
+ reason = "High pH indicates base spill, possible soap
+or chemical contamination.";
+ severity = 70;
+ danger = "High";
+ marineImpact = "High alkalinity can damage aquatic life
+and affect water usability.";
+ } else if(ldr < 25){
+ pollutionType = "Oil spill or visibility blockage";
+ reason = "Very low light detection suggests surface
+oil, floating debris, or thick pollution.";
+ severity = 80;
+ danger = "High";
+ marineImpact = "Oil spills suffocate fish, block
+sunlight, and disrupt ecosystems.";
+ } else {
+ pollutionType = "Safe / Minimal pollution";
+ reason = "Sensor readings indicate generally safe
+conditions.";
+ severity = 10;
+ danger = "Low";
+ marineImpact = "Minimal impact.";
+ }
+ let remedies = severity >= 70 ?
+ "Immediate action recommended: remove pollutants,
+deploy floating barriers, neutralize pH, or contact environmental
+authorities." :
+ severity >= 50 ?
+ "Moderate measures: filtration, partial cleanup,
+monitor water, and reduce further contamination." :
+ "No urgent action needed; regular monitoring
+recommended.";
+ let outputDiv = document.getElementById("output");
+ outputDiv.innerHTML = `
+<b>Interpretations:</b>
+Turbidity: ${turbidityStatus}
+Visibility (LDR): ${ldrStatus}
+TDS: ${tdsStatus}
+Inside Temp: ${tempInsideStatus}
+Water Temp: ${tempOutsideStatus}
+pH: ${phStatus}
+<b>Pollution Detection & Analysis:</b>
+Type: ${pollutionType}
+Possible Reason: ${reason}
+Severity: ${severity}%
+Danger Level: ${danger}
+Impact on Marine Life: ${marineImpact}
+<b>Suggested Remedies:</b>
+${remedies}
+<b>Actionable Statements:</b>
+- Avoid using or consuming polluted water.
+- Monitor aquatic life and marine ecosystem closely.
+- Implement clean-up or filtration measures as needed.
+- If internal robot temp is high (>60°C), check for fire risk.
+- For high water temp or extreme pH, prevent exposure to humans and
+animals.
+ `;
+ // Animate output
+ outputDiv.classList.remove("show");
+ void outputDiv.offsetWidth; // reflow to retrigger
+animation
+ outputDiv.classList.add("show");
+ }
+ </script>
+</body>
+</html>
