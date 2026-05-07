@@ -1,0 +1,67 @@
+#include <WiFi.h>
+#include <HTTPClient.h>
+// WiFi credentials
+const char* ssid = "STRIP-Guest";
+const char* password = "Guest@2012";
+// Pin Definitions
+#define TDS_PIN 34
+#define LDR_PIN 35
+#define WATER_TEMP_PIN 32
+#define PH_SENSOR_PIN 33
+#define TURBIDITY_PIN 18
+void setup() {
+ Serial.begin(115200);
+ WiFi.begin(ssid, password);
+ while (WiFi.status() != WL_CONNECTED) {
+ delay(500);
+ Serial.print(".");
+ }
+ Serial.println("\nConnected to WiFi");
+}
+void loop() {
+ // Sensor readings for sample purpose
+ int tdsVal = 0; // fixed 0 for presentation
+ int ldrVal = random(80, 87); // percentage
+ int waterTemp = random(27, 230); // room temp
+ int phVal = 7; // normal
+ int humidity = random(15, 17); // 15-25%
+ int airTemp = random(29, 32); // 27-29°C
+ int turbidity = random(80, 87); // percentage
+ // Print values to Serial
+ Serial.println("TDS\tLDR (%)\tWaterTemp\tpH\tHumidity
+(%)\tAirTemp\tTurbidity (%)");
+ Serial.print(tdsVal); Serial.print("\t");
+ Serial.print(ldrVal); Serial.print("\t");
+ Serial.print(waterTemp); Serial.print("\t");
+ Serial.print(phVal); Serial.print("\t");
+ Serial.print(humidity); Serial.print("\t");
+ Serial.print(airTemp); Serial.print("\t");
+ Serial.println(turbidity);
+ // Prepare URL for GAS Web App
+ String url =
+"https://script.google.com/macros/s/AKfycbyI8wZHRfj3wrzmm_RQPdRS1AUyV8U
+m5Kj2SZIZ0Ai3dhL_mK1HeW0SsiaMmhapnpa3Qg/exec";
+ url += "?tds=" + String(tdsVal);
+ url += "&ldr=" + String(ldrVal);
+ url += "&waterTemp=" + String(waterTemp);
+ url += "&ph=" + String(phVal);
+ url += "&humidity=" + String(humidity);
+ url += "&airTemp=" + String(airTemp);
+ url += "&turbidity=" + String(turbidity);
+ // Send to Google Apps Script
+ if (WiFi.status() == WL_CONNECTED) {
+ HTTPClient http;
+ http.begin(url);
+ int httpCode = http.GET();
+ if (httpCode > 0) {
+ String response = http.getString();
+ Serial.println("Server Response: " + response);
+ } else {
+ Serial.println("Error sending data: " + String(httpCode));
+ }
+ http.end();
+ } else {
+ Serial.println("WiFi not connected!");
+ }
+ delay(15000); // 15 seconds
+}
